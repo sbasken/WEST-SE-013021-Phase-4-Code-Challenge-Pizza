@@ -48,12 +48,31 @@ class Pizzas(Resource):
     def get(self):
         pizzas_dict = [ pizza.to_dict() for pizza in Pizza.query.all() ]
         return pizzas_dict
+    
+class Restaurant_pizzas(Resource):
+
+    def post(self):
+        data = request.get_json()
+        new_restaurant_pizza = RestaurantPizza(
+            price = data['price'],
+            pizza_id = data['pizza_id'],
+            restaurant_id = data['restaurant_id']
+        )
+        try:
+            db.session.add(new_restaurant_pizza)
+            db.session.commit()
+            
+        except ValueError:
+            return { 'error' : "Invalid input"}
+        
+        return make_response(new_restaurant_pizza.to_dict(rules=('pizza', 'pizza.id', '-id')), 201)
 
 
 
 api.add_resource(Restaurants, '/restaurants')
 api.add_resource(Restaurant_by_id, '/restaurants/<int:id>')
 api.add_resource(Pizzas, '/pizzas')
+api.add_resource(Restaurant_pizzas, '/restaurant_pizzas')
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
