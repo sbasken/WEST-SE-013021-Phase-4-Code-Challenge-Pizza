@@ -42,11 +42,18 @@ class Restaurant_by_id(Resource):
         db.session.delete(found_restaurant)
         db.session.commit()
         return make_response({}, 204)
+    
+class Pizzas(Resource):
+
+    def get(self):
+        pizzas_dict = [ pizza.to_dict() for pizza in Pizza.query.all() ]
+        return pizzas_dict
 
 
 
 api.add_resource(Restaurants, '/restaurants')
 api.add_resource(Restaurant_by_id, '/restaurants/<int:id>')
+api.add_resource(Pizzas, '/pizzas')
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
