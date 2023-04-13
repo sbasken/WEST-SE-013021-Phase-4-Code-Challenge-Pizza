@@ -21,7 +21,10 @@ class Pizza(db.Model, SerializerMixin):
     created_at = db.Column(db.DateTime, server_default=db.func.now())
     updated_at = db.Column(db.DateTime, onupdate=db.func.now())
     
-    restraunt_pizzas = db.relationship("RestaurantPizza", backref="pizza")
+    restraunt_pizzas = db.relationship("RestaurantPizza", back_populates="pizza")
+    restaurants = association_proxy('restraunt_pizzas', 'restaurant')
+
+    serialize_rules = ( '-created_at', '-updated_at', '-restaurant_pizzas', 'restaurants')
 
     def __repr__(self):
         return f"<Pizza Name: {self.name}, Ingredients: {self.ingredients}>"
@@ -37,8 +40,10 @@ class RestaurantPizza(db.Model, SerializerMixin):
     pizza_id = db.Column(db.Integer, db.ForeignKey("pizzas.id"))
     restaurant_id = db.Column(db.Integer, db.ForeignKey("restaurants.id"))
 
-    pizza = db.relationship("Pizza", backref="restraunt_pizzas")
-    restaurant = db.relationship("Restaurant", backref="restraunt_pizzas")
+    pizza = db.relationship("Pizza", backref="restaurant_pizzas")
+    restaurant = db.relationship("Restaurant", backref="restaurant_pizzas")
+
+    serialize_rules = ( '-created_at', '-updated_at')
 
     def __repr__(self):
         return f"<RestaurantPizza Price: {self.price}, Pizza: {self.pizza_id}, Restaurant: {self.restaurant_id}>"
@@ -50,7 +55,10 @@ class Restaurant(db.Model, SerializerMixin):
     name = db.Column(db.String)
     address = db.Column(db.String)
 
-    restraunt_pizzas = db.relationship("RestaurantPizza", backref="restaurant")
+    restraunt_pizzas = db.relationship("RestaurantPizza", back_populates="restaurant")
+    pizzas = association_proxy('restraunt_pizzas', 'pizza')
+
+    serialize_rules = ( 'restaurant_pizzas', 'pizzas')
 
     def __repr__(self):
         return f"<Restaurant Name: {self.name}, Address: {self.address}>"
